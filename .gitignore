@@ -1,0 +1,102 @@
+# ═══════════════════════════════════════════════
+# FastWAM 项目特定
+# ═══════════════════════════════════════════════
+
+# AI coding 工具
+.claude/
+.codex/
+.devcontainer/
+
+# 运行产物
+runs/
+outputs/
+data/
+checkpoints/
+evaluate_results/
+experiments/
+temp/
+
+# 模型权重 / 大文件
+*.pt
+*.bin
+*.safetensors
+*.ckpt
+
+# ═══════════════════════════════════════════════
+# Python
+# ═══════════════════════════════════════════════
+
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+*.egg-info/
+*.egg
+dist/
+build/
+.eggs/
+
+# 虚拟环境
+.env
+.venv
+env/
+venv/
+
+# ═══════════════════════════════════════════════
+# 工具
+# ═══════════════════════════════════════════════
+
+# IDE
+.idea/
+.vscode/
+*.swp
+
+# 测试 / 覆盖率
+.pytest_cache/
+.coverage
+coverage.xml
+htmlcov/
+report.xml
+
+# Linter / Type checker
+.mypy_cache/
+.ruff_cache/
+.pytype/
+
+# wandb
+wandb/
+
+# DeepSpeed
+.deepspeed*
+
+# ═══════════════════════════════════════════════
+# OS
+# ═══════════════════════════════════════════════
+
+.DS_Store
+Thumbs.db
+
+# ═══════════════════════════════════════════════
+# 数据文件
+# ═══════════════════════════════════════════════
+
+*.tar
+*.tar.gz
+*.gz
+*.zip
+*.pkl
+*.pickle
+*.jit
+*.hdr
+*.locks*
+*.no_exist*
+*models--t5*
+
+# 日志
+*.log
+onelogger.err
+onelogger.log
+
+# 凭证
+credentials/
+*.secret

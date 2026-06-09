@@ -1,0 +1,118 @@
+# ═══════════════════════════════════════════════
+# 数据
+# ═══════════════════════════════════════════════
+data:
+  data_mix: robocasa365_pretrain_all     # → mixtures.py 查找
+  action_dim: 12                          # sum(action_keys 各维度)
+  proprio_dim: 16                         # sum(state_keys 各维度)
+  stride: 1                              # latent 滑窗步长
+  action_video_freq_ratio: 4             # 视频子采样率
+  num_frames: 33                         # chunk 帧数
+  val_set_proportion: 0.01
+  base_seed: 42
+  zero_pad_len: 18
+  padded_memory_ratio: 0.0          # 训练时随机让 memory 落在 zero_pad 区域的概率
+  memory_truncate_ratio: 0.2        # 训练时随机截断 memory（long+mid 部分置零）的概率
+
+# ═══════════════════════════════════════════════
+# 模型
+# ═══════════════════════════════════════════════
+model:
+  model_id: Wan-AI/Wan2.2-TI2V-5B
+  tokenizer_model_id: Wan-AI/Wan2.1-T2V-1.3B
+  tokenizer_max_len: 128
+  load_text_encoder: false
+  redirect_common_files: true
+  action_dit_pretrained_path: /mnt/workspace/lintong.lt/wam/pretrain_checkpoint/fastwam/ActionDiT_linear_interp_Wan22_alphascale_1024hdim.pt
+  skip_dit_load_from_pretrain: false
+
+  multi_term_memory: true
+  mtm_history_sizes: [16, 2, 1]
+  mtm_pred_size: 2
+  mtm_amplify_history: false
+  mtm_zero_history_timestep: true
+  mot_checkpoint_mixed_attn: false
+
+  video_dit_config:
+    has_image_input: false
+    patch_size: [1, 2, 2]
+    in_dim: 48
+    hidden_dim: 3072
+    ffn_dim: 14336
+    freq_dim: 256
+    text_dim: 4096
+    out_dim: 48
+    num_heads: 24
+    attn_head_dim: 128
+    num_layers: 30
+    eps: 1.0e-06
+    seperated_timestep: true
+    require_clip_embedding: false
+    require_vae_embedding: false
+    fuse_vae_embedding_in_latents: false
+    use_gradient_checkpointing: false
+    video_attention_mask_mode: first_frame_causal
+    action_conditioned: false
+    action_dim: 12
+    action_group_causal_mask_mode: group_diagonal
+
+  action_dit_config:
+    action_dim: 12
+    hidden_dim: 1024
+    ffn_dim: 4096
+    num_heads: 24
+    attn_head_dim: 128
+    num_layers: 30
+    text_dim: 4096
+    freq_dim: 256
+    eps: 1.0e-06
+    use_gradient_checkpointing: false
+
+  video_scheduler:
+    train_shift: 5.0
+    infer_shift: 5.0
+    num_train_timesteps: 1000
+
+  action_scheduler:
+    train_shift: 5.0
+    infer_shift: 5.0
+    num_train_timesteps: 1000
+
+  loss:
+    lambda_action: 1.0
+
+  # Cond Latent Corruption（可选，IDM 模型专用）
+  # cond_latent_corruption:
+  #   mode: "downsample"        # "downsample" / "noise" / null
+  #   ratio_min: 0.3            # downsample: 随机缩放比 ~ U(ratio_min, 1.0)
+  #   pass_through_prob: 0.1    # 10% 概率不做腐蚀
+
+# ═══════════════════════════════════════════════
+# 训练
+# ═══════════════════════════════════════════════
+trainer:
+  output_dir: ./runs/robocasa365_pretrain
+  batch_size: 16
+  num_workers: 12
+  learning_rate: 1.0e-4
+  lr_scheduler_type: cosine
+  num_epochs: 10
+  max_steps: 10000
+  log_every: 10
+  save_every: 2500
+  eval_every: 500
+  eval_num_inference_steps: 10
+  gradient_accumulation_steps: 1
+  mixed_precision: bf16
+  seed: 42
+  max_grad_norm: 1.0
+  weight_decay: 1.0e-2
+  resume: null
+
+# ═══════════════════════════════════════════════
+# wandb
+# ═══════════════════════════════════════════════
+wandb:
+  enabled: false
+  project: fast-wam-latent
+  name: robocasa365_pretrain

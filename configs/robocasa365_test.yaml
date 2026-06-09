@@ -1,0 +1,110 @@
+# ═══════════════════════════════════════════════
+# 测试配置（4 个子数据集，端到端链路验证）
+# ═══════════════════════════════════════════════
+data:
+  data_mix: robocasa365_test
+  action_dim: 12
+  proprio_dim: 16
+  stride: 33
+  action_video_freq_ratio: 4
+  num_frames: 33
+  val_set_proportion: 0.01
+  base_seed: 42
+  zero_pad_len: 18
+
+# ═══════════════════════════════════════════════
+# 模型
+# ═══════════════════════════════════════════════
+model:
+  model_id: Wan-AI/Wan2.2-TI2V-5B
+  tokenizer_model_id: Wan-AI/Wan2.1-T2V-1.3B
+  tokenizer_max_len: 128
+  load_text_encoder: false
+  redirect_common_files: true
+  action_dit_pretrained_path: /mnt/workspace/lintong.lt/wam/pretrain_checkpoint/fastwam/ActionDiT_linear_interp_Wan22_alphascale_1024hdim.pt
+  skip_dit_load_from_pretrain: false
+
+  multi_term_memory: true
+  mtm_history_sizes: [16, 2, 1]
+  mtm_pred_size: 2
+  mtm_amplify_history: false
+  mtm_zero_history_timestep: true
+  mot_checkpoint_mixed_attn: false
+
+  video_dit_config:
+    has_image_input: false
+    patch_size: [1, 2, 2]
+    in_dim: 48
+    hidden_dim: 3072
+    ffn_dim: 14336
+    freq_dim: 256
+    text_dim: 4096
+    out_dim: 48
+    num_heads: 24
+    attn_head_dim: 128
+    num_layers: 30
+    eps: 1.0e-06
+    seperated_timestep: true
+    require_clip_embedding: false
+    require_vae_embedding: false
+    fuse_vae_embedding_in_latents: false
+    use_gradient_checkpointing: false
+    video_attention_mask_mode: first_frame_causal
+    action_conditioned: false
+    action_dim: 12
+    action_group_causal_mask_mode: group_diagonal
+
+  action_dit_config:
+    action_dim: 12
+    hidden_dim: 1024
+    ffn_dim: 4096
+    num_heads: 24
+    attn_head_dim: 128
+    num_layers: 30
+    text_dim: 4096
+    freq_dim: 256
+    eps: 1.0e-06
+    use_gradient_checkpointing: false
+
+  video_scheduler:
+    train_shift: 5.0
+    infer_shift: 5.0
+    num_train_timesteps: 1000
+
+  action_scheduler:
+    train_shift: 5.0
+    infer_shift: 5.0
+    num_train_timesteps: 1000
+
+  loss:
+    lambda_action: 1.0
+
+# ═══════════════════════════════════════════════
+# 训练（小规模测试）
+# ═══════════════════════════════════════════════
+trainer:
+  output_dir: ./runs/robocasa365_test
+  batch_size: 4
+  num_workers: 4
+  learning_rate: 1.0e-4
+  lr_scheduler_type: cosine
+  num_epochs: 1
+  max_steps: 100
+  log_every: 10
+  save_every: 50
+  eval_every: 50
+  eval_num_inference_steps: 5
+  gradient_accumulation_steps: 1
+  mixed_precision: bf16
+  seed: 42
+  max_grad_norm: 1.0
+  weight_decay: 1.0e-2
+  resume: null
+
+# ═══════════════════════════════════════════════
+# wandb
+# ═══════════════════════════════════════════════
+wandb:
+  enabled: false
+  project: fast-wam-latent
+  name: robocasa365_test
